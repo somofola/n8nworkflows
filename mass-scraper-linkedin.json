@@ -1,0 +1,460 @@
+{
+  "name": "Linkedin mass scraper #1",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/customsearch/v1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "=AIzaSyAOThSECP868QpYGVDD66JZid2HDbz2tk4"
+            },
+            {
+              "name": "cx",
+              "value": "7694f7cd3776143dd"
+            },
+            {
+              "name": "q",
+              "value": "={{$node[\"Set Fields\"].json.baseQuery}} {{Number($node[\"Set Fields\"].json.queryIndex)}}"
+            },
+            {
+              "name": "start",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2448,
+        -288
+      ],
+      "id": "cbfc5f50-0a23-4112-9f9a-8766fc23a869",
+      "name": "Search Google1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming items. The previous node sends each search result as a separate item.\nconst incomingItems = $items();\n\n// --- STATE PRESERVATION ---\n// Get 'currentPage' for pagination. It might not be on every item,\n// so we'll try to get it from the first one and default to 1 if missing.\nconst currentPage = $input.first().json.currentPage || 1;\n\n// --- PROCESSING RESULTS ---\n// Process each incoming item. 'n8nItem' is the wrapper object from n8n,\n// and 'n8nItem.json' contains the actual data for one search result.\nconst results = incomingItems.map(n8nItem => {\n  const item = n8nItem.json; // This is the search result object you want to process\n\n  // Safely get metatags; defaults to an empty object if missing.\n  const metatags = item.pagemap?.metatags?.[0] || {};\n\n  // --- Primary Data Extraction (from Metatags) ---\n  const firstName = metatags['profile:first_name'];\n  const lastName = metatags['profile:last_name'];\n  const description = metatags['og:description'];\n  const rawTitle = metatags['og:title'] || item.title || '';\n  const cleanedTitle = rawTitle.replace(/\\| LinkedIn/gi, '').trim();\n\n  // --- Fallback Data Extraction (from standard fields) ---\n  const titleParts = cleanedTitle.split(' - ');\n  const fullNameFromTitle = titleParts[0]?.trim();\n  const nameParts = fullNameFromTitle?.split(' ') || [];\n  \n  const guessedFirstName = nameParts[0];\n  const guessedLastName = nameParts.slice(1).join(' ');\n  const professionalTitle = titleParts.slice(1).join(' - ').trim();\n\n  // --- Final Output Object ---\n  // Prioritizes metatag data but uses guessed fallbacks if necessary.\n  return {\n    firstname: firstName || guessedFirstName || null,\n    lastname: lastName || guessedLastName || null,\n    description: description || item.snippet || null,\n    location: metatags.locale || null,\n    title: professionalTitle || fullNameFromTitle || null,\n    linkedinUrl: item.formattedUrl || item.link || null,\n    currentPage: currentPage // Always include the current page for state tracking\n  };\n});\n\n// Return the final processed results in the correct n8n format.\nreturn results.map(r => ({ json: r }));\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        -288
+      ],
+      "id": "8e7d5dc1-a6de-441b-b319-29f1be26a644",
+      "name": "Extract Results1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1U7lxGmDaS024BtFO12pBDQLl0gkefd0pnwsSIqNK7f8",
+          "mode": "list",
+          "cachedResultName": "leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1U7lxGmDaS024BtFO12pBDQLl0gkefd0pnwsSIqNK7f8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1532290307,
+          "mode": "list",
+          "cachedResultName": "Sheet10",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1U7lxGmDaS024BtFO12pBDQLl0gkefd0pnwsSIqNK7f8/edit#gid=1532290307"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First name ": "={{ $json.firstname }}",
+            "Last name": "={{ $json.lastname }}",
+            "bio": "={{ $json.description }}",
+            "location": "={{ $json.location }}",
+            "linkedin_url": "={{ $json.linkedinUrl }}",
+            "title ": "={{ $json.title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First name ",
+              "displayName": "First name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last name",
+              "displayName": "Last name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bio",
+              "displayName": "bio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title ",
+              "displayName": "title ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3792,
+        -288
+      ],
+      "id": "ce9d37a0-7af7-4239-9a54-b4034cda56dc",
+      "name": "Add to Google1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qXGqjV87zgRCxeFV",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const currentPage = $runIndex + 1;\n\n// Get the maxPages variable from the Set Fields1 node.\nconst maxPages = $('Set Fields').first().json.maxPages\n\n// Get the response from the previous Search Google node.\nconst lastResult = $('Search Google1').first().json;\n\n// The Google Custom Search API returns a 'nextPage' object if there are more results.\n// If this object is not present, it means we have reached the end of the results for this query.\nconst hasNextPage = lastResult.queries.nextPage ? true : false;\n\n// The loop should continue only if there is a next page AND we haven't hit the max page limit.\nconst continueLoop = hasNextPage && currentPage < maxPages;\n\n// The startIndex for the next search is what the API provides in its response.\nconst startIndex = lastResult.queries.nextPage ? lastResult.queries.nextPage[0].startIndex : null;\n\nreturn {\n  json: {\n    continueLoop,\n    startIndex,\n    currentPage\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4016,
+        -288
+      ],
+      "id": "5e282e73-8af1-4e70-ba28-433162178c9c",
+      "name": "Pagination1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "faef2862-80a4-465b-9e0b-be5b9753dcbd",
+              "leftValue": "={{ $json.continueLoop }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4240,
+        -216
+      ],
+      "id": "2004d720-1470-4f67-8893-aa3d47485c69",
+      "name": "Pagination Check1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        -288
+      ],
+      "id": "f48d883b-d732-464d-a130-c452f5a3e06a",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc27b2d9-8de7-43ca-a741-2d150084f78e",
+              "name": "currentStartIndex",
+              "value": "={{$runIndex === 0 ? 1 : $node[\"Pagination1\"].json.startIndex}}\n\n",
+              "type": "number"
+            },
+            {
+              "id": "fc552c57-4510-4f04-aa09-2294306d0d9f",
+              "name": "maxPages",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "0a6da0df-e0b8-4c1d-96fb-4eea4a95c0b9",
+              "name": "queryIndex",
+              "value": "={{$runIndex === 0 ? 1 : $node[\"Pagination1\"].json.currentPage + 1}}",
+              "type": "number"
+            },
+            {
+              "id": "f230884b-2631-4639-b1ea-237353036d34",
+              "name": "baseQuery",
+              "value": "web 3 crypto vc  site:linkedin.com/in",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2224,
+        -216
+      ],
+      "id": "e5f1753e-bfd3-44a9-be2a-46360b73f81f",
+      "name": "Set Fields"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3344,
+        -288
+      ],
+      "id": "ccfb9edc-796f-4e25-bf26-c96df7e3698f",
+      "name": "Wait",
+      "webhookId": "faeaa137-ae39-4b73-be84-d65e3df9ccb0"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2896,
+        -288
+      ],
+      "id": "febefbdb-266a-4f37-a061-22a7e8ef8f4a",
+      "name": "Wait1",
+      "webhookId": "e85bbc2d-5975-4d50-a4d2-f5b619ea2a7e"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        -216
+      ],
+      "id": "effc048b-9391-44f4-9695-411e7fb9995c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.linkedinUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        3568,
+        -288
+      ],
+      "id": "c71ca4e2-a16a-4bd3-b5d4-3c664dc85a67",
+      "name": "Remove Duplicates"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Search Google1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Results1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Google1": {
+      "main": [
+        [
+          {
+            "node": "Pagination1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination1": {
+      "main": [
+        [
+          {
+            "node": "Pagination Check1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination Check1": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields": {
+      "main": [
+        [
+          {
+            "node": "Search Google1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Extract Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Add to Google1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "af7362c2-1797-4de9-a180-b6cf0f1b2ef6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7bee1681ba20cd173cd01137fa5093c068c1fe32a526d68383d89f8f63dce6d"
+  },
+  "id": "07oKZSqud3sTU0gy",
+  "tags": [
+    {
+      "createdAt": "2025-09-07T11:35:16.451Z",
+      "updatedAt": "2025-09-07T11:35:16.451Z",
+      "id": "M4AitXE92Ja8S78A",
+      "name": "youtube"
+    }
+  ]
+}
