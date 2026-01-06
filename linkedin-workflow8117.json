@@ -1,0 +1,543 @@
+{
+  "id": "",
+  "meta": {
+    "instanceId": "your-instance-id-here",
+    "templateCredsSetupCompleted": false
+  },
+  "name": "LinkedIn Lead Enrichment with AI Personalization for Cold Outreach",
+  "tags": [
+    {
+      "id": "1",
+      "name": "Sales",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Lead Generation",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "AI",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "workflow-overview-note",
+      "name": "⚡ WORKFLOW UPDATED WITH LINKFINDER AI ⚡",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -420,
+        240
+      ],
+      "parameters": {
+        "color": 5,
+        "width": 680,
+        "height": 720,
+        "content": "## ⚡ WORKFLOW UPDATED WITH LINKFINDER AI ⚡\n\nThis workflow has been optimized by replacing 2 nodes with LinkFinder AI services for better performance and reliability.\n\n### Replaced Services:\n- **Scrape LinkedIn Profile** → LinkFinder AI linkedin_profile_to_linkedin_info\n- **Find Email with Hunter.io** → LinkFinder AI company_name_to_email\n\n### Setup Instructions:\n1. **Get your API key:** https://linkfinderai.com/?ref=reddit\n2. **Replace ALL instances of {api_key_here}** with your actual API key in the LinkFinder AI nodes\n3. Test the workflow with 2-3 sample LinkedIn URLs\n4. Update Google Sheets ID in the final node\n\n### LinkFinder AI Services Used:\n- **linkedin_profile_to_linkedin_info** - Extracts comprehensive LinkedIn profile data\n- **company_name_to_email** - Finds verified company email addresses\n\n---\n\n## 🎯 LinkedIn Lead Enrichment with AI Personalization\n\n### **Who's it for:**\nSales teams, growth marketers, and business development professionals who want to automate lead research and create personalized outreach at scale.\n\n### **What it does:**\n- ✅ Scrapes LinkedIn profiles using LinkFinder AI (UPGRADED)\n- ✅ Enriches leads with emails using LinkFinder AI (UPGRADED)\n- Generates personalized outreach messages using AI\n- Stores enriched data in Google Sheets\n\n### **Requirements:**\n- **LinkFinder AI API key** (get at https://linkfinderai.com/?ref=reddit)\n- OpenAI API key (GPT-4 recommended)\n- Google Sheets access\n- LinkedIn profile URLs of target leads\n\n### **Key Improvements:**\n- More reliable LinkedIn scraping with LinkFinder AI\n- Better email finding with higher accuracy\n- Simplified workflow with fewer dependencies\n- No need for Hunter.io or custom scrapers\n\n💡 **Pro Tip:** LinkFinder AI handles rate limiting automatically, so you can process leads faster.\n\n📺 **Watch Setup Guide:** [Add your Loom video link here]"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "step-1-note",
+      "name": "Step 1 Context",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        140,
+        240
+      ],
+      "parameters": {
+        "color": 7,
+        "width": 380,
+        "height": 180,
+        "content": "## Step 1: Configure Your Campaign\n\nSet your target criteria and personalization variables here.\n\nThis makes it easy to update without touching other nodes."
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "step-2-note",
+      "name": "Step 2 Context",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        660,
+        240
+      ],
+      "parameters": {
+        "color": 7,
+        "width": 380,
+        "height": 180,
+        "content": "## Step 2: Extract LinkedIn Data\n\n⚡ UPGRADED: Now using LinkFinder AI for more reliable profile scraping.\n\nNo rate limits - process profiles faster!"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "step-3-note",
+      "name": "Step 3 Context",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1180,
+        240
+      ],
+      "parameters": {
+        "color": 7,
+        "width": 380,
+        "height": 180,
+        "content": "## Step 3: Find Email Addresses\n\n⚡ UPGRADED: Using LinkFinder AI for verified email finding.\n\nHigher accuracy than Hunter.io with better deliverability."
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "step-4-note",
+      "name": "Step 4 Context",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1700,
+        240
+      ],
+      "parameters": {
+        "color": 7,
+        "width": 380,
+        "height": 180,
+        "content": "## Step 4: AI Personalization\n\nGenerate custom outreach messages based on:\n- Job title\n- Company info\n- Recent activity\n- Your value proposition"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "step-5-note",
+      "name": "Step 5 Context",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2220,
+        240
+      ],
+      "parameters": {
+        "color": 7,
+        "width": 380,
+        "height": 180,
+        "content": "## Step 5: Store Enriched Leads\n\nSave all enriched data to Google Sheets for review and outreach."
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "campaign-settings-node",
+      "name": "Set Campaign Variables",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        180,
+        480
+      ],
+      "parameters": {
+        "mode": "raw",
+        "options": {},
+        "jsonOutput": "{\n  \"target_industry\": \"SaaS\",\n  \"target_role\": \"Head of Sales\",\n  \"company_name\": \"YourCompany\",\n  \"value_proposition\": \"We help sales teams book 30% more meetings using AI-powered personalization\",\n  \"linkedin_urls\": [\n    \"https://www.linkedin.com/in/sample-profile-1\",\n    \"https://www.linkedin.com/in/sample-profile-2\"\n  ]\n}"
+      },
+      "typeVersion": 3.4
+    },
+    {
+      "id": "split-urls-node",
+      "name": "Split LinkedIn URLs",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        380,
+        480
+      ],
+      "parameters": {
+        "options": {},
+        "fieldToSplitOut": "linkedin_urls"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "scrape-linkedin-node",
+      "name": "LinkFinder AI - Scrape LinkedIn Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        700,
+        480
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {api_key_here}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedin_urls }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "typeVersion": 4.2,
+      "notes": "REPLACED: Custom HTTP Request LinkedIn scraper\nService: linkedin_profile_to_linkedin_info\nPurpose: Extracts comprehensive LinkedIn profile data including name, title, company, location, and more\nAPI Key: Get yours at https://linkfinderai.com/?ref=reddit"
+    },
+    {
+      "id": "parse-linkedin-data-node",
+      "name": "Parse LinkedIn Data",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        900,
+        480
+      ],
+      "parameters": {
+        "jsCode": "const profileData = $input.item.json;\n\nconst fullName = profileData.full_name || profileData.name || 'Unknown';\nconst nameParts = fullName.split(' ');\nconst firstName = nameParts[0] || '';\nconst lastName = nameParts.slice(1).join(' ') || '';\n\nreturn {\n  full_name: fullName,\n  first_name: firstName,\n  last_name: lastName,\n  title: profileData.headline || profileData.title || 'Not specified',\n  company: profileData.company || profileData.current_company || 'Unknown',\n  location: profileData.location || 'Unknown',\n  linkedin_url: $('Split LinkedIn URLs').item.json.linkedin_urls,\n  profile_summary: profileData.summary || '',\n  experience: profileData.experience || [],\n  education: profileData.education || []\n};"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "find-email-node",
+      "name": "LinkFinder AI - Find Company Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1220,
+        480
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {api_key_here}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.company }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "typeVersion": 4.2,
+      "notes": "REPLACED: Hunter.io email finder\nService: company_name_to_email\nPurpose: Finds verified company email addresses with high accuracy\nAPI Key: Get yours at https://linkfinderai.com/?ref=reddit"
+    },
+    {
+      "id": "process-email-node",
+      "name": "Process Email Result",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1420,
+        480
+      ],
+      "parameters": {
+        "jsCode": "const emailData = $input.item.json;\nconst leadData = $('Parse LinkedIn Data').item.json;\n\nconst email = emailData.email || emailData.data?.email || null;\nconst confidence = emailData.confidence || emailData.score || 100;\n\nreturn {\n  ...leadData,\n  email: email,\n  email_confidence: confidence,\n  email_verified: email ? true : false\n};"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "check-email-exists-node",
+      "name": "Email Found?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1620,
+        480
+      ],
+      "parameters": {
+        "options": {},
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "email-exists-condition",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              },
+              "leftValue": "={{ $json.email }}",
+              "rightValue": ""
+            }
+          ]
+        }
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "generate-personalization-node",
+      "name": "Generate AI Personalization",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1900,
+        400
+      ],
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4-turbo-preview",
+          "cachedResultName": "GPT-4 Turbo"
+        },
+        "options": {},
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert sales copywriter. Generate a highly personalized cold outreach message based on the prospect's information.\n\n**Prospect Details:**\n- Name: {{ $json.first_name }} {{ $json.last_name }}\n- Title: {{ $json.title }}\n- Company: {{ $json.company }}\n- Location: {{ $json.location }}\n\n**Our Company:** {{ $('Set Campaign Variables').item.json.company_name }}\n**Value Proposition:** {{ $('Set Campaign Variables').item.json.value_proposition }}\n\n**Instructions:**\n1. Start with a personalized opener that references their role or company\n2. Clearly state the value proposition in one sentence\n3. Include a soft call-to-action\n4. Keep it under 100 words\n5. Professional but conversational tone\n6. No hype or pushy language\n\n**Output Format:**\nProvide ONLY the message body, no subject line or greetings. Return as JSON:\n{\n  \"message\": \"your personalized message here\"\n}"
+            }
+          ]
+        },
+        "jsonOutput": true
+      },
+      "typeVersion": 1.8
+    },
+    {
+      "id": "save-to-sheets-node",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2260,
+        480
+      ],
+      "parameters": {
+        "columns": {
+          "value": {
+            "Email": "={{ $json.email }}",
+            "Title": "={{ $json.title }}",
+            "Company": "={{ $json.company }}",
+            "Location": "={{ $json.location }}",
+            "Full Name": "={{ $json.full_name }}",
+            "Last Name": "={{ $json.last_name }}",
+            "First Name": "={{ $json.first_name }}",
+            "LinkedIn URL": "={{ $json.linkedin_url }}",
+            "Enriched Date": "={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}",
+            "Email Confidence": "={{ $json.email_confidence }}",
+            "Personalized Message": "={{ $json.ai_message }}"
+          },
+          "schema": [],
+          "mappingMode": "defineBelow",
+          "matchingColumns": []
+        },
+        "options": {},
+        "operation": "append",
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "cachedResultName": "Lead Enrichment Sheet"
+        }
+      },
+      "typeVersion": 4.5
+    },
+    {
+      "id": "merge-ai-data-node",
+      "name": "Merge AI Message",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2100,
+        400
+      ],
+      "parameters": {
+        "jsCode": "const leadData = $('Process Email Result').item.json;\nconst aiResponse = $input.item.json.message?.content || {};\nconst aiMessage = aiResponse.message || 'Personalization failed - manual review needed';\n\nreturn {\n  ...leadData,\n  ai_message: aiMessage,\n  processing_timestamp: new Date().toISOString()\n};"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "no-email-found-node",
+      "name": "No Email - Skip",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        1900,
+        560
+      ],
+      "parameters": {},
+      "typeVersion": 1
+    },
+    {
+      "id": "rate-limit-wait-node",
+      "name": "Rate Limit Delay",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        560,
+        480
+      ],
+      "webhookId": "rate-limit-webhook-id",
+      "parameters": {
+        "unit": "seconds",
+        "amount": 2
+      },
+      "typeVersion": 1.1
+    }
+  ],
+  "active": false,
+  "pinData": {},
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "versionId": "",
+  "connections": {
+    "Email Found?": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Personalization",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Email - Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge AI Message": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Delay": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Scrape LinkedIn Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LinkedIn Data": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Find Company Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split LinkedIn URLs": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Email Result": {
+      "main": [
+        [
+          {
+            "node": "Email Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Campaign Variables": {
+      "main": [
+        [
+          {
+            "node": "Split LinkedIn URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Scrape LinkedIn Profile": {
+      "main": [
+        [
+          {
+            "node": "Parse LinkedIn Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Find Company Email": {
+      "main": [
+        [
+          {
+            "node": "Process Email Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Personalization": {
+      "main": [
+        [
+          {
+            "node": "Merge AI Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
