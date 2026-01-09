@@ -1,0 +1,368 @@
+{
+  "name": "Add LinkedIn Post Commenters to HubSpot CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "🔗 LinkedIn Post Engagement Automation",
+        "formDescription": "Enter your LinkedIn post URL below to automatically send personalized connection requests to people who commented on your post.\n\n⚠️ Important: Make sure your LinkedIn account is warmed up and ready for automation.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "LinkedIn Post URL",
+              "placeholder": "https://www.linkedin.com/posts/your-post-url...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        1600
+      ],
+      "id": "7b1e1c28-945a-4bbe-bfed-cdbf418bd7f6",
+      "name": "📋 Form: Enter Post URL",
+      "webhookId": "857ee681-e451-4ff1-8a89-3e73b519c385",
+      "notes": "📝 STEP 1: TRIGGER\n\n✅ What this does:\n- Displays a form to capture the LinkedIn post URL\n- Validates that a URL is provided\n- Starts the workflow execution\n\n💡 User Action Required:\n1. Click 'Test workflow' to get the form URL\n2. Open the form URL in your browser\n3. Paste your LinkedIn post URL\n4. Submit the form to start automation\n\n⚙️ Configuration:\n- Form title can be customized\n- Webhook automatically generated\n- No credentials needed"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {api_key_here}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_post_to_reactions"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['LinkedIn Post URL'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2688,
+        1600
+      ],
+      "id": "6be9c601-5537-44c8-a437-75ae2071680e",
+      "name": "LinkFinder AI - Get Post Reactions",
+      "notes": "📝 STEP 2: FETCH COMMENTS (REPLACED WITH LINKFINDER AI)\n\n✅ What this does:\n- Retrieves all reactions/comments from the specified LinkedIn post\n- Uses LinkFinder AI's linkedin_post_to_reactions service\n- Returns comprehensive engagement data\n\n📊 Output Data Structure:\n- Result is an array accessible via $json.result\n- Contains commenter profile information and interaction details\n\n⚠️ Important:\n- Requires LinkFinder AI API key in Authorization header\n- Post URL must be valid LinkedIn post format\n- Response contains array of all post engagements"
+    },
+    {
+      "parameters": {
+        "content": "## Add LinkedIn Post Commenters to HubSpot CRM\n\nThis workflow automatically enriches LinkedIn post commenters with professional data and adds them as contacts to your HubSpot CRM.\n\n### How it works\n1. Submit a LinkedIn post URL via the form trigger\n2. Fetch all comments from the specified post using LinkFinder AI\n3. Loop through each commenter and enrich their profile using LinkFinder AI\n4. Check if the contact has a valid email address\n5. Create or update the contact in HubSpot CRM with enriched data\n\n### Setup steps\n1. Configure your LinkFinder AI API credentials in the Authorization headers\n2. Configure your HubSpot App Token credentials\n3. Activate the workflow and submit a LinkedIn post URL\n\n### Customization\n- Modify the HubSpot node to map additional fields from the enriched data\n- Add filters to exclude certain commenters based on criteria\n- Adjust the loop batch size based on your API rate limits\n\n**Note:** This template uses LinkFinder AI services for LinkedIn data enrichment.",
+        "height": 666,
+        "width": 617
+      },
+      "id": "d5f8b3d0-eadf-4f90-88ae-807f19f28d20",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {api_key_here}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.profileUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3360,
+        1528
+      ],
+      "id": "49acf3a7-2c83-4b75-ab50-ef259f96011d",
+      "name": "LinkFinder AI - Enrich LinkedIn Profile",
+      "notes": "📝 STEP 4: ENRICH PROFILE DATA (REPLACED WITH LINKFINDER AI)\n\n✅ What this does:\n- Scrapes complete LinkedIn profile information\n- Extracts personal and company data\n- Returns structured profile data including email\n\n📊 Output Data Fields (Access directly, NO .result):\n- $json.email - Person's email address\n- $json.fullName - Complete name\n- $json.jobTitle - Current job title\n- $json.companyName - Company name\n- $json.addressWithCountry - Full location\n- $json.addressCountryOnly - Country only\n- $json.companyWebsite - Company website\n- $json.mobileNumber - Phone number\n- And 15+ more fields\n\n⚠️ CRITICAL:\n- Downstream nodes must use $json.email NOT $json.result.email\n- All fields accessed directly from $json object\n- Requires valid LinkedIn profile URL from previous step"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "127bd789-e920-4bc1-8999-8adf2065002f",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3584,
+        1528
+      ],
+      "id": "97c71e38-6f23-4ecb-bbb3-3c9b1a5ae36d",
+      "name": "Check if Contact is eligible to add into CRM",
+      "notes": "📝 STEP 5: VALIDATE EMAIL (UPDATED)\n\n✅ What this does:\n- Checks if LinkFinder AI found a valid email address\n- Routes contacts with emails to HubSpot CRM\n- Skips contacts without emails\n\n⚠️ UPDATED REFERENCE:\n- Changed from: $json['04_Email']\n- Changed to: $json.email\n- Now correctly references LinkFinder AI response structure\n\n💡 Logic:\n- TRUE path: Email exists → Create/update in HubSpot\n- FALSE path: No email → Skip to loop continuation"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "city": "={{ $json.addressWithCountry.split(',')[0] }}",
+          "companyName": "={{ $json.companyName }}",
+          "country": "={{ $json.addressCountryOnly }}",
+          "firstName": "={{ $json.fullName.split(' ')[0] }}",
+          "jobTitle": "={{ $json.jobTitle }}",
+          "lastName": "={{ $json.fullName.split(' ').slice(1).join(' ') }}",
+          "streetAddress": "={{ $json.addressWithCountry }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.1,
+      "position": [
+        3808,
+        1456
+      ],
+      "id": "b74c1c6d-98c6-45c9-8e8a-c110f4e4e67b",
+      "name": "Create or update a contact",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "J7o0PJ0iOhYxXE0P",
+          "name": "HubSpot App Token account"
+        }
+      },
+      "notes": "📝 STEP 6: CREATE HUBSPOT CONTACT (UPDATED)\n\n✅ What this does:\n- Creates or updates contact in HubSpot CRM\n- Maps enriched LinkedIn data to HubSpot fields\n- Uses email as unique identifier\n\n⚠️ UPDATED FIELD MAPPINGS:\n- email: $json.email (was $json['04_Email'])\n- firstName: Extracted from $json.fullName (was $json['02_First_name'])\n- lastName: Extracted from $json.fullName (was $json['03_Last_name'])\n- jobTitle: $json.jobTitle (was $json['07_Title'])\n- companyName: $json.companyName (was $json['16_Company_name'])\n- city: Extracted from $json.addressWithCountry (was $json['14_City'])\n- country: $json.addressCountryOnly (was $json['15_Country'])\n- streetAddress: $json.addressWithCountry (was $json['13_Current_address'])\n\n💡 All fields now correctly reference LinkFinder AI response structure"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3136,
+        1600
+      ],
+      "id": "2b0a5c8c-82ea-44e3-9ee8-d00798f48e49",
+      "name": "Loop Over Items",
+      "notes": "📝 STEP 3B: BATCH PROCESSING\n\n✅ What this does:\n- Processes reactions one at a time\n- Prevents API rate limiting\n- Manages workflow execution flow\n\n🔧 Technical Details:\n- Batch size: 1 (process one commenter at a time)\n- Loops back after processing each item\n- Continues until all reactions processed\n\n💡 Why batching:\n- Prevents overwhelming LinkFinder AI API\n- Allows for error handling per item\n- Maintains stable workflow execution"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        4032,
+        1600
+      ],
+      "id": "093f1774-0450-45c5-88f1-e1f3e0bc0528"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "result",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2912,
+        1600
+      ],
+      "id": "c43c265b-a769-41c6-a56e-b2f6fbdee47c",
+      "name": "📤 Split Reactions Array",
+      "notes": "📝 STEP 3: SPLIT DATA (UPDATED)\n\n✅ What this does:\n- Takes the array of reactions from LinkFinder AI\n- Splits each reaction into a separate item\n- Prepares data for loop processing\n\n🔧 Technical Details:\n- Splits 'result' field (LinkFinder AI response structure)\n- Each item becomes a separate execution flow\n- Enables processing one commenter at a time\n\n⚠️ UPDATED:\n- Changed from: 'comments' field\n- Changed to: 'result' field\n- Now correctly references LinkFinder AI response: $json.result\n\n💡 Example:\nInput: {result: [reaction1, reaction2, reaction3]}\nOutput: 3 separate items, one per reaction"
+    },
+    {
+      "parameters": {
+        "content": "## 1. Trigger & Fetch Comments",
+        "height": 264,
+        "width": 484,
+        "color": 6
+      },
+      "id": "74f0fb51-753c-46ec-a0bc-5d41ed28c24b",
+      "name": "Sticky Note - Trigger Section",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2368,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Enrich & Add to CRM",
+        "height": 344,
+        "width": 784,
+        "color": 6
+      },
+      "id": "97c0242f-bce0-4d49-a6d9-9448501aa916",
+      "name": "Sticky Note - Enrich Section",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3536,
+        1360
+      ]
+    }
+  ],
+  "connections": {
+    "📋 Form: Enter Post URL": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Post Reactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Post Reactions": {
+      "main": [
+        [
+          {
+            "node": "📤 Split Reactions Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Enrich LinkedIn Profile": {
+      "main": [
+        [
+          {
+            "node": "Check if Contact is eligible to add into CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Contact is eligible to add into CRM": {
+      "main": [
+        [
+          {
+            "node": "Create or update a contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "LinkFinder AI - Enrich LinkedIn Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📤 Split Reactions Array": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a contact": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
