@@ -1,0 +1,437 @@
+{
+  "name": "Send Connection Request to People who comment on a post",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "🔗 LinkedIn Post Engagement Automation",
+        "formDescription": "Enter your LinkedIn post URL below to automatically send personalized connection requests to people who commented on your post.\n\n⚠️ Important: Make sure your LinkedIn account is warmed up and ready for automation.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "LinkedIn Post URL",
+              "placeholder": "https://www.linkedin.com/posts/your-post-url...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        1344
+      ],
+      "id": "4016a7b6-3b8a-4ea0-bbd0-54fae5bc38f5",
+      "name": "📋 Form: Enter Post URL",
+      "webhookId": "7afac8e2-e5da-4ded-93d0-d2e416557569",
+      "notes": "📝 STEP 1: TRIGGER\n\n✅ What this does:\n- Displays a form to capture the LinkedIn post URL\n- Validates that a URL is provided\n- Starts the workflow execution\n\n💡 User Action Required:\n1. Click 'Test workflow' to get the form URL\n2. Open the form URL in your browser\n3. Paste your LinkedIn post URL\n4. Submit the form to start automation\n\n⚙️ Configuration:\n- Form title can be customized\n- Webhook automatically generated\n- No credentials needed"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {api_key_here}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_post_to_reactions"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['LinkedIn Post URL'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2688,
+        1344
+      ],
+      "id": "80491b9c-de9c-4a03-bfa6-bb6e8f0948df",
+      "name": "LinkFinder AI - Get Post Comments",
+      "notes": "📝 STEP 2: FETCH COMMENTS (REPLACED WITH LINKFINDER AI)\n\n✅ What this does:\n- Retrieves all comments/reactions from the specified LinkedIn post\n- Uses LinkFinder AI's linkedin_post_to_reactions service\n- Returns array of commenter data\n\n📊 Output Data Structure:\n- Returns: {\"result\": [array of reaction/comment data]}\n- Access with: $json.result\n\n⚠️ Important:\n- Requires LinkFinder AI API key in Authorization header\n- Replace {api_key_here} with your actual API key\n- Returns all interactions on the post\n\n🔄 REPLACEMENT NOTE:\n- Original: ConnectSafely LinkedIn node\n- New: LinkFinder AI HTTP Request\n- Benefit: Unified API, better rate limits"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "result",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2912,
+        1344
+      ],
+      "id": "b743cab3-157f-4d28-8230-e11228f56e53",
+      "name": "📤 Split Comments Array",
+      "notes": "📝 STEP 3: SPLIT DATA (UPDATED FOR LINKFINDER AI)\n\n✅ What this does:\n- Takes the 'result' array from LinkFinder AI response\n- Splits each comment/reaction into a separate item\n- Prepares data for loop processing\n\n🔧 Technical Details:\n- UPDATED: Now splits 'result' field (LinkFinder AI format)\n- Each item becomes a separate execution flow\n- Enables processing one commenter at a time\n\n💡 Data Flow:\nInput: {result: [user1, user2, user3]}\nOutput: 3 separate items, one per user\n\n⚠️ CHANGE FROM ORIGINAL:\n- Was: fieldToSplitOut = \"comments\"\n- Now: fieldToSplitOut = \"result\" (LinkFinder AI structure)"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3136,
+        1344
+      ],
+      "id": "0a61e901-8878-4a89-b838-d38a877e827b",
+      "name": "🔄 Loop Over Items",
+      "notes": "📝 STEP 4: BATCH PROCESSING LOOP\n\n✅ What this does:\n- Processes commenters one at a time\n- Creates a loop to handle each person\n- Controls the flow back after each iteration\n\n⚙️ Settings:\n- Reset: FALSE (maintains loop state)\n- Batch size: 1 (processes one at a time)\n\n🔁 Loop Flow:\n1. Takes next commenter\n2. Processes through workflow\n3. Returns here after Wait node\n4. Continues to next commenter\n5. Completes when all done\n\n💡 This ensures rate limiting and sequential processing"
+    },
+    {
+      "parameters": {
+        "operation": "checkRelationship",
+        "profileId": "={{ $json.publicIdentifier }}"
+      },
+      "type": "n8n-nodes-connectsafely-ai.connectSafelyLinkedIn",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        1344
+      ],
+      "id": "aeaba049-cc7a-4cfe-8709-a5e8a3fdac6c",
+      "name": "🔗 Check Connection Status",
+      "credentials": {
+        "connectSafelyApi": {
+          "id": "vguTjjYyauTnaVdw",
+          "name": "Karan ConnectSafely Account"
+        }
+      },
+      "notes": "📝 STEP 5: RELATIONSHIP CHECK\n\n✅ What this does:\n- Checks if you're already connected with this person\n- Checks if a connection request is already pending\n- Prevents duplicate connection requests\n\n📊 Returns:\n- connected: true/false (already connected?)\n- invitationSent: true/false (request pending?)\n- connectionDegree: 1st, 2nd, 3rd degree\n\n⚡ Why this matters:\n- Avoids LinkedIn spam warnings\n- Saves API calls\n- Prevents awkward duplicate requests\n\n🔒 Uses your ConnectSafely credentials"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "523bc2aa-7f52-476a-932a-68a25c203206",
+              "leftValue": "={{ $json.connected }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4e7ba588-fe7e-41c6-b1ce-586e78f32e9f",
+              "leftValue": "={{ $json.invitationSent }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3584,
+        1344
+      ],
+      "id": "a3207947-c06b-4478-aa6a-a59206bd5d58",
+      "name": "❓ Should Send Request?",
+      "notes": "📝 STEP 6: DECISION LOGIC\n\n✅ What this does:\n- Filters out people you're already connected with\n- Filters out people with pending requests\n- Only continues for valid new connections\n\n🎯 Conditions (BOTH must be TRUE):\n✓ connected = false (NOT already connected)\n✓ invitationSent = false (NO pending request)\n\n🔀 Two Paths:\n➡️ TRUE (top): Send connection request\n➡️ FALSE (bottom): Skip this person, go to next\n\n💡 This is your safety filter to prevent:\n- Duplicate requests\n- Spam warnings from LinkedIn\n- Wasted API calls"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================================================\n// 🎲 SPIN TEXT MESSAGE GENERATOR\n// ================================================\n// This code creates unique, personalized messages\n// for each connection request using spin text syntax\n// ================================================\n\n/**\n * Spin function: Processes {option1|option2|option3} syntax\n * and randomly selects one option from each group\n */\nfunction spin(text) {\n  // Supports nested spintax (improved)\n  while (text.match(/\\{([^{}]+)\\}/)) {\n    text = text.replace(/\\{([^{}]+)\\}/g, (_, group) => {\n      const parts = group.split(\"|\");\n      return parts[Math.floor(Math.random() * parts.length)];\n    });\n  }\n  return text;\n}\n\n// ================================================\n// 📝 SPIN TEXT TEMPLATE\n// ================================================\n// Customize this template to match your style\n// Use {option1|option2|option3} for variations\n// ================================================\n\nconst template = `{Thanks for|Really appreciate|Awesome to see|Loved seeing|Grateful for} {you|you taking a moment to|you recently} {liking|engaging with|reacting to|showing interest in|checking out} {my|our|the} {post|recent post|latest content piece|content|update} on {this topic|that topic|the subject}. \n\n{Would love to|Happy to|Let's definitely|Open to|Excited to} connect {and|so we can|to} {exchange ideas|share insights|continue the conversation|explore potential collaborations|stay connected professionally}. {Always enjoy connecting with|Always excited to meet|Love meeting|Great connecting with} {like-minded people|professionals in the space|people exploring similar topics|others in this domain}.\n\n{Cheers|Best regards|Thanks again|Looking forward|Talk soon|Warm regards},\nKaran\n`;\n\n// ================================================\n// 🔄 PROCESS EACH ITEM\n// ================================================\n\nfor (const item of $input.all()) {\n  \n  // Replace LinkedIn name placeholder\n  const messageWithName = template.replace(\n    \"{{$('Loop Over Items').item.json.authorName}}\",\n    item.json.authorName || \"there\"\n  );\n\n  // Generate randomized final message\n  item.json.generatedMessage = spin(messageWithName);\n  \n  // Add metadata for tracking\n  item.json.messageLength = item.json.generatedMessage.length;\n  item.json.templateUsed = \"default_template_v1\";\n  item.json.generatedAt = new Date().toISOString();\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3808,
+        1232
+      ],
+      "id": "1965066f-ee40-48f1-b64a-a75472462a17",
+      "name": "✍️ Generate Personalized Message",
+      "notes": "📝 STEP 7: MESSAGE GENERATION\n\n✅ What this does:\n- Takes the spin text template\n- Randomly selects variations for each {option}\n- Inserts the commenter's first name\n- Creates a unique personalized message\n\n🎯 Example Output:\n\"Thanks for engaging with my recent post! Would love to connect and share insights. Always excited to meet professionals in the space.\n\nBest regards,\nKaran\"\n\n⚙️ Customization:\n- Edit the 'template' variable in the code\n- Add more {variation|options} as needed\n- Change your signature\n- Adjust tone and style\n\n📏 Character Limit:\n- LinkedIn max: 300 characters\n- Current template: ~200-280 characters\n- Message length tracked in output\n\n💡 Pro Tip: Test the template with a small batch first!"
+    },
+    {
+      "parameters": {
+        "operation": "sendConnectionRequest",
+        "accountId": "={{ $json.accountId }}",
+        "profileId": "={{ $('🔄 Loop Over Items').item.json.publicIdentifier }}",
+        "profileUrn": "=",
+        "customMessage": "=Hi {{ $('🔄 Loop Over Items').item.json.authorName }},\n\n{{ $json.generatedMessage }}"
+      },
+      "type": "n8n-nodes-connectsafely-ai.connectSafelyLinkedIn",
+      "typeVersion": 1,
+      "position": [
+        4032,
+        1232
+      ],
+      "id": "e0778400-649e-4ff6-8c8e-975dcf205120",
+      "name": "📨 Send Connection Request",
+      "credentials": {
+        "connectSafelyApi": {
+          "id": "vguTjjYyauTnaVdw",
+          "name": "Karan ConnectSafely Account"
+        }
+      },
+      "notes": "📝 STEP 8: SEND CONNECTION REQUEST\n\n✅ What this does:\n- Sends the personalized connection request\n- Includes the custom message generated in previous step\n- Adds \"Hi [Name]\" greeting automatically\n\n📤 Message Structure:\nHi [First Name],\n\n[Generated Message]\n\n🔑 Required Data:\n- accountId: Your LinkedIn account\n- profileUrn: Target person's profile ID\n- customMessage: The personalized message\n\n⚠️ LinkedIn Limits:\n- ~100 connection requests per week (safe)\n- 300 character message limit\n- Accounts need warmup period\n\n✅ Success indicators:\n- Node turns green\n- Connection request sent\n- Moves to Wait node\n\n❌ If it fails:\n- Check account status\n- Verify profile is valid\n- Check message length (<300 chars)"
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * (7200 - 3600 + 1)) + 3600 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4256,
+        1232
+      ],
+      "id": "1c12d68c-a9e3-4e31-9da4-99d429afa0ec",
+      "name": "⏱️ Wait (Rate Limiting)",
+      "webhookId": "86d93a49-02e9-4d6a-b500-d8f02040e049",
+      "notes": "📝 STEP 9: RATE LIMITING & SAFETY\n\n✅ What this does:\n- Adds a random delay between connection requests\n- Mimics human behavior patterns\n- Prevents LinkedIn spam detection\n\n⏱️ Wait Time:\n- Minimum: 3,600 seconds (1 hour)\n- Maximum: 7,200 seconds (2 hours)\n- Random between these values\n\n🤖 Why This Matters:\n- LinkedIn monitors automation patterns\n- Human-like timing = safer account\n- Prevents rate limit violations\n- Reduces spam warning risk\n\n⚙️ Customization Options:\n- Decrease for faster processing (risky)\n- Increase for maximum safety\n- Formula: Math.floor(Math.random() * (MAX - MIN + 1)) + MIN\n\n💡 Recommended Settings:\n- New accounts: 2-3 hours between requests\n- Warmed accounts: 1-2 hours\n- Premium accounts: 30-60 minutes\n\n🔒 After wait completes, loops back to process next commenter"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "⏭️ Skip to Next Person",
+      "typeVersion": 1,
+      "position": [
+        4480,
+        1416
+      ],
+      "id": "c5007758-82d2-4b65-ab64-f145249101c9",
+      "notes": "📝 SKIP NODE (NO ACTION)\n\n✅ What this does:\n- Acts as a passthrough for skipped profiles\n- Routes rejected items back to loop\n- No actual operation performed\n\n🔀 When this path is taken:\n- Person is already connected\n- Connection request already pending\n- Any other filter condition not met\n\n💡 Flow:\nSkipped person → This node → Loop back → Next person\n\n📊 This helps track:\n- How many people were skipped\n- Reason for skipping (check IF node)\n- Overall workflow efficiency"
+    },
+    {
+      "parameters": {},
+      "id": "9811f6f6-4095-4b57-9493-3472c9be7be2",
+      "name": "✅ All Done!",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        1152
+      ],
+      "notes": "📝 COMPLETION NODE\n\n✅ What this means:\n- All commenters have been processed\n- Loop has finished\n- Workflow execution complete\n\n📊 What happened:\n✓ Fetched all comments from post using LinkFinder AI\n✓ Checked connection status for each\n✓ Sent requests to eligible people\n✓ Skipped already connected people\n✓ Applied rate limiting between requests\n\n🎯 Next Steps:\n1. Check your LinkedIn for sent requests\n2. Monitor acceptance rate\n3. Review workflow execution data\n4. Adjust message template if needed\n\n💡 Pro Tips:\n- Track which messages get best response\n- A/B test different templates\n- Monitor LinkedIn for any warnings\n- Keep warmup schedule consistent"
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 LinkedIn Connection Request Automation\n\n### 📋 Workflow Overview\nThis workflow automatically sends personalized connection requests to people who commented on your LinkedIn post.\n\n---\n\n### ⚙️ How It Works:\n\n1️⃣ **Form Submission** - You paste a LinkedIn post URL\n2️⃣ **Fetch Comments** - LinkFinder AI retrieves all commenters from the post\n3️⃣ **Split Data** - Separates each commenter for individual processing\n4️⃣ **Loop Processing** - Handles each person one at a time\n5️⃣ **Check Status** - Verifies if already connected or request pending\n6️⃣ **Filter Logic** - Only proceeds with new potential connections\n7️⃣ **Generate Message** - Creates unique personalized message with spin text\n8️⃣ **Send Request** - Sends the connection request with custom message\n9️⃣ **Rate Limiting** - Waits 1-2 hours before next request (safety)\n🔁 **Loop Back** - Returns to step 4 for next person\n\n---",
+        "height": 986,
+        "width": 617,
+        "color": 4
+      },
+      "id": "48135af8-d097-4b59-8ad6-c4e7910aa8fe",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⚡ QUICK START GUIDE\n\n### 1️⃣ Before You Start:\n- [ ] LinkFinder AI API key obtained\n- [ ] API key added to HTTP Request node\n- [ ] ConnectSafely account created (for sending requests)\n- [ ] LinkedIn account warmed up\n- [ ] Account status checked\n\n### 2️⃣ First Run:\n1. Click \"Test workflow\" button\n2. Copy the webhook URL that appears\n3. Open URL in browser\n4. Paste your LinkedIn post URL\n5. Submit form\n6. Watch the magic happen! ✨\n\n### 3️⃣ What to Expect:\n- Takes 1-2 hours per person\n- Progress shown in execution log\n- Green nodes = success\n- Red nodes = check logs\n\n### 4️⃣ After First Run:\n- Check LinkedIn for sent requests\n- Verify messages look good\n- Adjust template if needed\n- Scale up gradually\n\n### ⚠️ First Time Tips:\n- Start with just 5-10 people\n- Test during off-hours\n- Monitor closely\n- Don't rush the process!\n\n### 🔄 REPLACEMENT NOTES:\n- Comment fetching now uses LinkFinder AI\n- More reliable and faster\n- Better rate limits",
+        "height": 599.296875,
+        "width": 388.5981932773109,
+        "color": 6
+      },
+      "id": "62899ec7-e051-4476-8210-2b19d79525a0",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4768,
+        1008
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "📋 Form: Enter Post URL": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Post Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Post Comments": {
+      "main": [
+        [
+          {
+            "node": "📤 Split Comments Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "✅ All Done!",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🔗 Check Connection Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⏭️ Skip to Next Person": {
+      "main": [
+        [
+          {
+            "node": "🔄 Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📤 Split Comments Array": {
+      "main": [
+        [
+          {
+            "node": "🔄 Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔗 Check Connection Status": {
+      "main": [
+        [
+          {
+            "node": "❓ Should Send Request?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❓ Should Send Request?": {
+      "main": [
+        [
+          {
+            "node": "✍️ Generate Personalized Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⏭️ Skip to Next Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📨 Send Connection Request": {
+      "main": [
+        [
+          {
+            "node": "⏱️ Wait (Rate Limiting)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✍️ Generate Personalized Message": {
+      "main": [
+        [
+          {
+            "node": "📨 Send Connection Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⏱️ Wait (Rate Limiting)": {
+      "main": [
+        [
+          {
+            "node": "⏭️ Skip to Next Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bfb9a806-5923-402d-a51c-d0f4f150b6d4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "236005009187e5f1d11ee86ef51842534d02495609005ae153bbff2e6b50a598"
+  },
+  "id": "EfHvZwVVyikttUiG",
+  "tags": [
+    {
+      "createdAt": "2025-12-05T08:03:58.741Z",
+      "updatedAt": "2025-12-05T08:03:58.741Z",
+      "id": "3aoFKPsGhnsUxZTC",
+      "name": "Connection Requests"
+    },
+    {
+      "createdAt": "2025-12-05T08:03:58.731Z",
+      "updatedAt": "2025-12-05T08:03:58.731Z",
+      "id": "U0Es2zqNEFffH3cu",
+      "name": "LinkedIn Automation"
+    },
+    {
+      "createdAt": "2025-12-05T08:03:58.750Z",
+      "updatedAt": "2025-12-05T08:03:58.750Z",
+      "id": "ve0yBVHdTSS8zZT2",
+      "name": "ConnectSafely"
+    }
+  ]
+}
