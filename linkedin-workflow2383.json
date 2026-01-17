@@ -1,0 +1,310 @@
+{
+  "name": "Lead Research with LinkFinder AI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 LinkFinder AI Workflow\n\n**What is LinkFinder AI?**\nA tool to enrich leads and companies and scrape LinkedIn without a LinkedIn account.\n\n**Get API Key:** https://linkfinderai.com\n\n---\n\n## What This Does\n\nEnriches leads with company and LinkedIn data, then sends results to Google Sheets.\n\n**Input:** Full name, company domain\n**Output:** Email, phone, LinkedIn data, company info\n\n---\n\n## Setup (3 Steps)\n\n1. Get API key from https://linkfinderai.com\n2. Open each 'LinkFinder AI' node\n3. Replace YOUR_API_KEY_HERE with your key\n\n---\n\n## Services Used\n\n- company_name_to_email\n- company_name_to_phone\n- company_name_to_linkedin_url\n- lead_full_name_to_linkedin_url\n- linkedin_profile_to_linkedin_info",
+        "height": 380,
+        "width": 350,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 240],
+      "id": "doc-note",
+      "name": "📖 Read Me First"
+    },
+    {
+      "parameters": {
+        "formTitle": "Lead Research Request",
+        "formDescription": "Submit lead information for enrichment",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "John Smith",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company Domain",
+              "placeholder": "example.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Start Research"
+        }
+      },
+      "id": "trigger-node",
+      "name": "New Lead Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [640, 300],
+      "webhookId": "lead-research-form"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Company Domain'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 200],
+      "id": "company-email",
+      "name": "LinkFinder AI - Company Email",
+      "notes": "Service: company_name_to_email\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_phone"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Company Domain'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 400],
+      "id": "company-phone",
+      "name": "LinkFinder AI - Company Phone",
+      "notes": "Service: company_name_to_phone\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "lead_full_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Full Name'] + ' ' + $json['Company Domain'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300],
+      "id": "find-linkedin",
+      "name": "LinkFinder AI - Find LinkedIn",
+      "notes": "Service: lead_full_name_to_linkedin_url\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.result }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, 300],
+      "id": "scrape-linkedin",
+      "name": "LinkFinder AI - Get Profile Data",
+      "notes": "Service: linkedin_profile_to_linkedin_info\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1CrLwmb92d8GU77yFLd1vZu08XE8W47zqrS5rkdgfmAs",
+          "mode": "list",
+          "cachedResultName": "Lead Research Analyst",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CrLwmb92d8GU77yFLd1vZu08XE8W47zqrS5rkdgfmAs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('New Lead Form').item.json['Full Name'] }}",
+            "Company": "={{ $('New Lead Form').item.json['Company Domain'] }}",
+            "Company Email": "={{ $('LinkFinder AI - Company Email').item.json.result }}",
+            "Company Phone": "={{ $('LinkFinder AI - Company Phone').item.json.result }}",
+            "LinkedIn URL": "={{ $('LinkFinder AI - Find LinkedIn').item.json.result }}",
+            "Person Email": "={{ $json.email }}",
+            "Job Title": "={{ $json.jobTitle }}",
+            "Mobile": "={{ $json.mobileNumber }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1600, 300],
+      "id": "save-to-sheets",
+      "name": "Save to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "m7xiSuoqHvxyxHZq",
+          "name": "Google Sheets Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "New Lead Form": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkFinder AI - Company Phone",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkFinder AI - Find LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Find LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Profile Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Profile Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "simplified-lead-research",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "linkfinderai-simple-workflow"
+  },
+  "id": "linkfinder-lead-research",
+  "tags": []
+}
